@@ -1,45 +1,45 @@
 import { ComponentRef, memo, useEffect, useRef } from 'react';
 import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
 import { gantt } from 'dhtmlx-gantt';
-import { Stack } from '@mui/material';
+import { getMoonIllumination } from 'suncalc';
 
 type GanttProps = {};
 
 const Gantt = memo<GanttProps>(() => {
   const ganttContainer = useRef<ComponentRef<'div'>>(null);
 
+  const formatDate = (date: Date) => {
+    const { fraction } = getMoonIllumination(date);
+    const illumination = Math.round(fraction * 100);
+
+    return `${gantt.date.date_to_str('%d %M %Y')(
+      date
+    )} <small>${illumination}%</small>`;
+  };
+
   useEffect(() => {
-    gantt.config.xml_date = '%Y-%m-%d';
-    gantt.config.scale_unit = 'month';
-    gantt.config.date_scale = '%F %Y';
-    gantt.config.subscales = [{ unit: 'day', step: 1, date: '%j %D' }];
+    gantt.config.xml_date = '%Y-%m-%d %H:%i';
+
+    gantt.config.scales = [
+      {
+        unit: 'day',
+        format: formatDate,
+      },
+      { unit: 'hour', step: 1, date: '%H:%i' },
+    ];
+
+    gantt.config.time_step = 60;
+    gantt.setWorkTime({ hours: [0, 24] });
+
+    gantt.config.start_date = new Date();
+    gantt.config.end_date = new Date(2025, 6, 10);
+
+    gantt.config.show_grid = false;
 
     if (ganttContainer.current) gantt.init(ganttContainer.current);
 
     gantt.parse({
-      data: [
-        {
-          id: 1,
-          text: 'Project start',
-          start_date: '2025-06-19',
-          duration: 5,
-          progress: 0.6,
-        },
-        {
-          id: 2,
-          text: 'Development',
-          start_date: '2025-06-24',
-          duration: 8,
-          progress: 0.3,
-        },
-        {
-          id: 3,
-          text: 'Testing',
-          start_date: '2025-07-03',
-          duration: 4,
-          progress: 0.1,
-        },
-      ],
+      data: [],
     });
 
     return () => {
@@ -48,10 +48,7 @@ const Gantt = memo<GanttProps>(() => {
   }, []);
 
   return (
-    <Stack
-      ref={ganttContainer}
-      style={{ width: '100%', height: '100vh' }}
-    ></Stack>
+    <div ref={ganttContainer} style={{ width: '100vw', height: '100vh' }}></div>
   );
 });
 
