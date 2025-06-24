@@ -1,12 +1,10 @@
 import './App.css';
 import Gantt from './Gantt';
 
-function App() {
-  return (
-    <div className='App'>
-      <Gantt />
-    </div>
-  );
-}
+const App = () => (
+  <div className='App'>
+    <Gantt day={new Date()} />
+  </div>
+);
 
 export default App;

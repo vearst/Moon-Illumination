@@ -5,9 +5,9 @@ import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
 import { ComponentRef, memo, useEffect, useRef } from 'react';
 import { formatDay, formatHour } from './utils';
 
-type GanttProps = {};
+type GanttProps = { day: Date };
 
-const Gantt = memo<GanttProps>(() => {
+const Gantt = memo<GanttProps>(({ day }) => {
   const ganttContainer = useRef<ComponentRef<'div'>>(null);
 
   useEffect(() => {
@@ -23,8 +23,8 @@ const Gantt = memo<GanttProps>(() => {
       },
     ];
 
-    gantt.config.start_date = startOfDay(new Date());
-    gantt.config.end_date = endOfDay(new Date());
+    gantt.config.start_date = startOfDay(day);
+    gantt.config.end_date = endOfDay(day);
 
     gantt.config.show_grid = false;
 
@@ -33,7 +33,7 @@ const Gantt = memo<GanttProps>(() => {
     return () => {
       gantt.clearAll();
     };
-  }, []);
+  }, [day]);
 
   return (
     <Stack

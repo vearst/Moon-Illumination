@@ -4,7 +4,7 @@ import { getMoonIllumination, getTimes } from 'suncalc';
 export const formatDay = (date: Date) => {
   const { sunrise, sunset } = getTimes(date, 31.3547, 34.3088);
 
-  return `${format(date, 'MM-dd')} <small>(${format(
+  return `${format(date, 'dd.M')} <small>(${format(
     sunrise,
     'HH:mm'
   )} - ${format(sunset, 'HH:mm')})</small>`;
