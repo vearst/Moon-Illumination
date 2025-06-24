@@ -1,49 +1,34 @@
-import { ComponentRef, memo, useEffect, useRef } from 'react';
-import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
-import { gantt } from 'dhtmlx-gantt';
-import { getMoonIllumination, getTimes } from 'suncalc';
 import { Stack } from '@mui/material';
+import { endOfDay, startOfDay } from 'date-fns';
+import { gantt } from 'dhtmlx-gantt';
+import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
+import { ComponentRef, memo, useEffect, useRef } from 'react';
+import { formatDay, formatHour } from './utils';
 
 type GanttProps = {};
 
-//TODO: have a normal timeline display instead of this ugly shit
 const Gantt = memo<GanttProps>(() => {
   const ganttContainer = useRef<ComponentRef<'div'>>(null);
 
-  const formatDate = (date: Date) => {
-    const { fraction } = getMoonIllumination(date);
-    const illumination = Math.round(fraction * 100);
-    const { sunrise, sunset } = getTimes(new Date(), 31.7769, 35.2224);
-
-    return `${gantt.date.date_to_str('%m-%d')(
-      date
-    )} <small>${illumination}%</small>
-    <small>(${sunrise.getHours()}:${sunrise.getMinutes()}-${sunset.getHours()}:${sunset.getMinutes()})</small>`;
-  };
-
   useEffect(() => {
-    gantt.config.xml_date = '%Y-%m-%d';
-
     gantt.config.scales = [
       {
         unit: 'day',
-        format: formatDate,
-        css: (date) => 'bob',
+        format: formatDay,
+        css: () => 'day',
+      },
+      {
+        unit: 'hour',
+        format: formatHour,
       },
     ];
 
-    gantt.setWorkTime({ hours: [0, 24] });
-
-    gantt.config.start_date = new Date();
-    gantt.config.end_date = new Date(2025, 6, 10);
+    gantt.config.start_date = startOfDay(new Date());
+    gantt.config.end_date = endOfDay(new Date());
 
     gantt.config.show_grid = false;
 
     if (ganttContainer.current) gantt.init(ganttContainer.current);
-
-    gantt.parse({
-      data: [],
-    });
 
     return () => {
       gantt.clearAll();
@@ -53,21 +38,17 @@ const Gantt = memo<GanttProps>(() => {
   return (
     <Stack
       sx={{
-        '& div:has(span)': {
-          minWidth: '90px',
-          minHeight: '70px',
-          justifyContent: 'center',
-          alignItems: 'center',
-        },
-        '& .bob': {
-          width: '1em',
-          whiteSpace: 'normal',
-          overflow: 'visible',
+        '.gantt_task_scale': { borderWidth: '0' },
+        '& .gantt_scale_line:has(.day)': {
+          backgroundColor: 'red',
+          lineHeight: '2em !important',
+          height: '2em !important',
+          color: 'white',
         },
       }}
       ref={ganttContainer}
       style={{ width: '100vw', height: '100vh' }}
-    ></Stack>
+    />
   );
 });
 
